@@ -8,7 +8,7 @@
 
 import UIKit
 
-class BountyViewController: UIViewController, UITableViewDataSource,  UITableViewDelegate {
+class BountyViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
     
     // mvvm
     
@@ -42,32 +42,87 @@ class BountyViewController: UIViewController, UITableViewDataSource,  UITableVie
         super.viewDidLoad()
     }
     
+    // UICollectionViewDataSource,
+    // 몇개를 어떻게 표현
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return viewModel.numOfList
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "GridCell", for: indexPath) as? GridCell
+            else {
+                return UICollectionViewCell()
+                
+        }
+        cell.update(info: viewModel.bountyInfo(at: indexPath.item))
+        return cell
+    }
+    
+    
+    // UICollectionViewDelegate,
+    // 클릭시 어떤 동작
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        print("--> \(indexPath.item)")
+        performSegue(withIdentifier: "showDetail", sender: indexPath.item)
+    }
+    
+    // UICollectionViewDelegateFlowLayout
+    // cell size를 계산할것 (다양한 기기에 일관적인 사이즈를 위해)
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        
+        let itemSpacing: CGFloat = 10
+        let textAreaHeight: CGFloat = 65
+        let width: CGFloat = (collectionView.bounds.width - itemSpacing)/2
+        let height: CGFloat = width * 10/7 + textAreaHeight
+
+        return CGSize(width: width, height: height)
+    }
+    
+    
+    
     // 아래 두개는 테이블뷰 필수값
     //UITableViewDataSource: 몇개보여줄건지, 사이즈는 ? 등등
     //UITableViewDelegate : 클릭시 동작
     
     // UITableViewDataSource
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.numOfList
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as? ListCell else {
-            return UITableViewCell()
-        }
-        cell.update(info: viewModel.bountyInfo(at: indexPath.row))
-        return cell
-    }
-    
-    // UITableViewDelegate
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        print("--> \(indexPath.row)")
-        performSegue(withIdentifier: "showDetail", sender: indexPath.row)
-    }
+    //    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    //        return viewModel.numOfList
+    //    }
+    //
+    //    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    //        guard let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as? ListCell else {
+    //            return UITableViewCell()
+    //        }
+    //        cell.update(info: viewModel.bountyInfo(at: indexPath.row))
+    //        return cell
+    //    }
+    //
+    //    // UITableViewDelegate
+    //    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    //        print("--> \(indexPath.row)")
+    //        performSegue(withIdentifier: "showDetail", sender: indexPath.row)
+    //    }
 
 }
 
-class ListCell: UITableViewCell { // view
+//    class ListCell: UITableViewCell { // view
+//
+//        @IBOutlet weak var imgView: UIImageView!
+//        @IBOutlet weak var nameLabel: UILabel!
+//        @IBOutlet weak var bountyLabel: UILabel!
+//
+//        func update(info: BountyInfo) {
+//            imgView.image = info.image
+//            nameLabel.text = info.name
+//            bountyLabel.text = "\(info.bounty)"
+//        }
+//
+//    }
+
+class GridCell: UICollectionViewCell { // view
     
     @IBOutlet weak var imgView: UIImageView!
     @IBOutlet weak var nameLabel: UILabel!
@@ -101,7 +156,6 @@ class BountyViewModel { // viewmodel
            }
         return result
     }
-    
     
     var numOfList: Int {
         return bountyInfoList.count
